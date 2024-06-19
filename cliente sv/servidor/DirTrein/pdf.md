@@ -1,1 +1,0 @@
-coloque seus arquivos pdf nesta pasta para serem treinados
