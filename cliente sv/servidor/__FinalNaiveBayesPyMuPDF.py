@@ -370,4 +370,5 @@ def resposta3():
     return jsonify({'message': 'Model trained successfully!', 'classification_report': result})
 
 if __name__ == '__main__':
-    app.run(host='SEU IP', port=5000)
+    pkl = ['CAMINHO DO ARQUIVO PKL']
+    app.run(host='SEU IP', port=5000, debug=True, extra_files=pkl)
