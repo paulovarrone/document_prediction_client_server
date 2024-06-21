@@ -4,7 +4,7 @@ O cliente enviará documentos para serem categorizados pela rede neural, determi
 
 Caso a IA cometa um erro, haverá uma opção para enviar o documento novamente com a classificação correta.
 
-O endpoint de treinamento da IA será programado para atualizações semanais, fora do horário comercial. 
+O endpoint de treinamento da IA poderá ser programado para atualizações semanais, fora do horário comercial, atualmente consta com um botão de treinamento no front. 
 
 Após cada treinamento, a aplicação Flask será reiniciada para aplicar as atualizações.
 
