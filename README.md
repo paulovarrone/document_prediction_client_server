@@ -6,6 +6,6 @@ Caso a IA cometa um erro, haverá uma opção para enviar o documento novamente 
 
 O endpoint de treinamento da IA poderá ser programado para atualizações semanais, fora do horário comercial, atualmente consta com um botão de treinamento no front. 
 
-Após cada treinamento, a aplicação Flask será reiniciada para aplicar as atualizações.
+Após cada treinamento, a aplicação Flask ve que o arquivo pkl foi atualizado e no mesmo instante ja utiliza do treinamento evoluído.
 
 Essas correções deixam o texto mais claro e preciso, garantindo que as informações sejam entendidas de maneira correta e completa.
