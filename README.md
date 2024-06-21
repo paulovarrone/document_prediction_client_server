@@ -9,3 +9,8 @@ O endpoint de treinamento da IA poderá ser programado para atualizações seman
 Após cada treinamento, a aplicação Flask ve que o arquivo pkl foi atualizado e no mesmo instante ja utiliza do treinamento evoluído.
 
 Essas correções deixam o texto mais claro e preciso, garantindo que as informações sejam entendidas de maneira correta e completa.
+
+
+
+
+![image](https://github.com/paulovarrone/document_prediction_client_server/assets/100317569/9ba83070-29d6-47c9-9208-29f78ebef815)
