@@ -34,6 +34,12 @@ def corrigir():
     if 'correcao_file' in request.files:
         file = request.files['correcao_file']
         especializada = request.form['especializada'].upper()
+
+        esp_validas = ['PAS', 'PDA', 'PPE', 'PSE', 'PTR', 'PUMA', 'PTA']
+        
+        if especializada not in esp_validas:
+            return render_template('index.html', erro_esp='SIGLA INCORRETA')
+        
         files = {'correcao_file' : (file.filename, file.read(), file.content_type)}
         data = {'especializada': especializada}
         proxy = {
