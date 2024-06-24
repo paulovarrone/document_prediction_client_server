@@ -15,12 +15,10 @@ from tqdm import tqdm  # Imports the tqdm function to display progress bars duri
 import pickle
 import fitz  # PyMuPDF
 from flask import Flask, Response, abort, jsonify, request, render_template
+
 import nltk
 import shutil
 
-#curl -X POST http://SEU IP:5000/treino
-#curl -X POST http://SEU IP:5000/classificar
-#curl -X POST http://SEU IP:5000/ajustar
 
 #ENDPOINTS treino, classificar, ajustar
 
@@ -103,75 +101,80 @@ def save_data(X_train, X_test, y_train, y_test, file_path):
 
 @app.route('/treino', methods=['POST'])
 def resposta():
-    print('HELLO WORLD')
-    sector_mapping = {  # Defines a dictionary to map alphabetical sector codes to numbers.
-    'PAS' :  0,
-    'PDA' :  1,
-    'PPE' :  2,
-    'PSE' :  3,
-    'PTR' :  4,
-    'PUMA':  5,
-    'PTA' :  6
-    }
+    try:
+        print('ENTRANDO EM TREINAMENTO')
+        sector_mapping = {  # Defines a dictionary to map alphabetical sector codes to numbers.
+        'PAS' :  0,
+        'PDA' :  1,
+        'PPE' :  2,
+        'PSE' :  3,
+        'PTR' :  4,
+        'PUMA':  5,
+        'PTA' :  6
+        }
 
-    # Directory where the data (PDFs) are stored
-    data_dir = r'C:\Users\3354339\Desktop\APITreinamento\DirTrein'  # Defines the directory where the PDF files are stored.
-    pdf_files = os.listdir(data_dir)  # Lists the files in the specified directory.
-    documents, labels = [], []
-    # documents = []  # Initializes a list to store the documents (text extracted from PDFs).
-    # labels = []  # Initializes a list to store the document labels (mapped sector codes).
-    
-   
-
-    for file in tqdm(pdf_files, desc='Processing PDFs'):  # Iterates over the PDF files in the directory.
-        if file.endswith('.pdf'):  # Checks if the file is a PDF.
-            pdf_path = os.path.join(data_dir, file)  # Gets the full path of the PDF file.
-            text = extract_text_from_pdf(pdf_path)  # Extracts text from the PDF.
-            documents.append(text)  # Adds the extracted text to the list of documents.
-            sector_code = file.split('_')[0]  # Extracts the sector code from the file name.
-            sector_label = sector_mapping.get(sector_code)  # Gets the sector number mapped to the code.
-            if sector_label is not None:  # Checks if the sector code is valid.
-                labels.append(sector_label)  # Adds the label to the list of labels.
-            else:
-                print(f'Warning: Invalid sector code found in file {file}')  # Warning if the sector code is invalid.
-
-    # Creating a DataFrame with the two training variables
-    df = pd.DataFrame({'documents': documents,  # Creates a DataFrame with the documents.
-                    'labels': labels  # Adds the labels to the DataFrame.
-                    })
-
-    X = df['documents']  # Extracts the documents as independent variables.
-    y = df['labels']  # Extracts the labels as dependent variables.
-
-    # Pipeline for vectorization/training model definition
-    pipeline = Pipeline([
-        ('vect', CountVectorizer(max_features=10000)),  # Vectorization step using CountVectorizer.
-        ('clf', MultinomialNB())  # Classification step using Multinomial Naive Bayes.
-    ])
-
+        # Directory where the data (PDFs) are stored
+        data_dir = r'CAMINHO DO DIRETORIO DIRTREIN ONDE SERÃO ALOCADOS OS PDFS'  # Defines the directory where the PDF files are stored.
+        pdf_files = os.listdir(data_dir)  # Lists the files in the specified directory.
+        documents, labels = [], []
+        # documents = []  # Initializes a list to store the documents (text extracted from PDFs).
+        # labels = []  # Initializes a list to store the document labels (mapped sector codes).
+        
     
 
-    print('Preprocessing training data...')  # Displays a message indicating the start of preprocessing.
-    X_prep = X.apply(preprocess_text)  # Applies preprocessing to the documents.
-    print('Preprocessing completed!')  # Displays a message indicating the completion of preprocessing.
+        for file in tqdm(pdf_files, desc='Processing PDFs'):  # Iterates over the PDF files in the directory.
+            if file.endswith('.pdf'):  # Checks if the file is a PDF.
+                pdf_path = os.path.join(data_dir, file)  # Gets the full path of the PDF file.
+                text = extract_text_from_pdf(pdf_path)  # Extracts text from the PDF.
+                documents.append(text)  # Adds the extracted text to the list of documents.
+                sector_code = file.split('_')[0]  # Extracts the sector code from the file name.
+                sector_label = sector_mapping.get(sector_code)  # Gets the sector number mapped to the code.
+                if sector_label is not None:  # Checks if the sector code is valid.
+                    labels.append(sector_label)  # Adds the label to the list of labels.
+                else:
+                    print(f'Warning: Invalid sector code found in file {file}')  # Warning if the sector code is invalid.
 
-    # Training the Naive Bayes model
-    pipeline.fit(X_prep, y)  # Trains the model with the preprocessed documents and corresponding labels.
+        # Creating a DataFrame with the two training variables
+        df = pd.DataFrame({'documents': documents,  # Creates a DataFrame with the documents.
+                        'labels': labels  # Adds the labels to the DataFrame.
+                        })
 
-    # Splitting data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X_prep, labels, test_size=0.2, random_state=42)
+        X = df['documents']  # Extracts the documents as independent variables.
+        y = df['labels']  # Extracts the labels as dependent variables.
+
+        # Pipeline for vectorization/training model definition
+        pipeline = Pipeline([
+            ('vect', CountVectorizer(max_features=10000)),  # Vectorization step using CountVectorizer.
+            ('clf', MultinomialNB())  # Classification step using Multinomial Naive Bayes.
+        ])
+
+        
+
+        print('Preprocessing training data...')  # Displays a message indicating the start of preprocessing.
+        X_prep = X.apply(preprocess_text)  # Applies preprocessing to the documents.
+        print('Preprocessing completed!')  # Displays a message indicating the completion of preprocessing.
+
+        # Training the Naive Bayes model
+        pipeline.fit(X_prep, y)  # Trains the model with the preprocessed documents and corresponding labels.
+
+        # Splitting data into training and testing sets
+        X_train, X_test, y_train, y_test = train_test_split(X_prep, labels, test_size=0.2, random_state=42)
+        
+        predictions = pipeline.predict(X_test)
+        report = classification_report(y_test, predictions)
+        file_path = 'trainingDataNaiveBayes.pkl'
+        save_data(X_train, X_test, y_train, y_test, file_path)
+        # Saves the model training and testing data to a file
+        print('\n')
+        print('Model training data saved')
+        print(report)
+        print(os.path.exists('trainingDataNaiveBayes.pkl')) 
+        print(os.path.getsize('trainingDataNaiveBayes.pkl'))
+
     
-    predictions = pipeline.predict(X_test)
-    report = classification_report(y_test, predictions)
-    file_path = 'trainingDataNaiveBayes.pkl'
-    save_data(X_train, X_test, y_train, y_test, file_path)
-    # Saves the model training and testing data to a file
-    print('\n')
-    print('Model training data saved')
-    print(report)
-
-    return jsonify({'message': 'Model trained successfully!', 'classification_report': report})
-
+        return jsonify({'message': 'Model trained successfully!', 'classification_report': report})
+    except Exception:
+        return jsonify({'error': 'Falha ao treinar IA'}), 500
 
 
 ##########################################################################################################################################
@@ -359,16 +362,29 @@ def copiar_pdf_para_diretorio(arquivo_pdf, destino_diretorio, especializada):
 
 @app.route('/ajustar', methods=['POST'])
 def resposta3():
-    if 'correcao_file' not in request.files:
-        return jsonify({'message': 'No file part'}), 400
-    
-    arquivo_pdf = request.files['correcao_file']
-    input_especializada = request.form['especializada'].upper()
-    caminho_dir = r"C:     CAMINHO DO DirTrein"
+    try:
+        if 'correcao_file' not in request.files:
+            return jsonify({'message': 'É NECESSÁRIO ENVIAR UM ARQUIVO'}), 400
+        
+        arquivo_pdf = request.files['correcao_file']
+        
 
-    result = copiar_pdf_para_diretorio(arquivo_pdf, caminho_dir, input_especializada)
-    return jsonify({'message': 'Model trained successfully!', 'classification_report': result})
+        if not arquivo_pdf.filename.endswith('.pdf'):
+            return jsonify({'message': 'O ARQUIVO NÃO É UM PDF.'}), 400
+
+        input_especializada = request.form['especializada'].upper()
+        if not input_especializada or input_especializada not in ['PAS', 'PDA', 'PPE', 'PSE', 'PTR', 'PUMA', 'PTA']:
+            return jsonify({'message': 'SIGLA INVÁLIDA'}), 400
+
+        caminho_dir = r"C:\Users\3354339\Desktop\APITreinamento\DirTrein"
+
+        result = copiar_pdf_para_diretorio(arquivo_pdf, caminho_dir, input_especializada)
+
+        
+        return jsonify({'message': 'Model trained successfully!', 'classification_report': result})
+    except Exception:
+        return jsonify({'message': 'ERRO'}), 400
 
 if __name__ == '__main__':
-    pkl = ['CAMINHO DO ARQUIVO PKL']
-    app.run(host='SEU IP', port=5000, debug=True, extra_files=pkl)
+    pkl = [r'CAMINHO PKL']
+    app.run(host='IP DO SEU SERVIDOR', port=5000, debug=True, extra_files=pkl)
