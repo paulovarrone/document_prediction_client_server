@@ -386,5 +386,5 @@ def resposta3():
         return jsonify({'message': 'ERRO'}), 400
 
 if __name__ == '__main__':
-    pkl = [r'CAMINHO PKL']
+    pkl = ['CAMINHO PKL']
     app.run(host='IP DO SEU SERVIDOR', port=5000, debug=True, extra_files=pkl)
