@@ -10,7 +10,7 @@ Após cada treinamento, a aplicação Flask ve que o arquivo pkl foi atualizado 
 
 Essas correções deixam o texto mais claro e preciso, garantindo que as informações sejam entendidas de maneira correta e completa.
 
-
+Este programa foi desenvolvido para a PROCURADORIA GERAL MUNICIPAL DO ESTADO DO RIO DE JANEIRO para classificação de documentos das especializadas e auxílio no envio para tais.
 
 
 ![image](https://github.com/paulovarrone/document_prediction_client_server/assets/100317569/9ba83070-29d6-47c9-9208-29f78ebef815)
