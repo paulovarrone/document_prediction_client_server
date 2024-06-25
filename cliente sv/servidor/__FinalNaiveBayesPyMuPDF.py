@@ -15,14 +15,20 @@ from tqdm import tqdm  # Imports the tqdm function to display progress bars duri
 import pickle
 import fitz  # PyMuPDF
 from flask import Flask, Response, abort, jsonify, request, render_template
-
+import logging
 import nltk
 import shutil
 
+#curl -X POST http://SEU IP:5000/treino
+#curl -X POST http://SEU IP:5000/classificar
+#curl -X POST http://SEU IP:5000/ajustar
 
 #ENDPOINTS treino, classificar, ajustar
 
 app = Flask(__name__)
+
+logging.basicConfig(filename='training_errors.log', level=logging.ERROR,
+                    format='%(asctime)s:%(levelname)s:%(message)s')
 
 ###########################################################################################################################################
 #ATENÇÃO - ATENÇÃO - ATENÇÃO - ATENÇÃO - ATENÇÃO - ATENÇÃO - ATENÇÃO - ATENÇÃO - ATENÇÃO - ATENÇÃO - ATENÇÃO - ATENÇÃO - ATENÇÃO - ATENÇÃO 
@@ -114,7 +120,7 @@ def resposta():
         }
 
         # Directory where the data (PDFs) are stored
-        data_dir = r'CAMINHO DO DIRETORIO DIRTREIN ONDE SERÃO ALOCADOS OS PDFS'  # Defines the directory where the PDF files are stored.
+        data_dir = './DirTrein'  # Defines the directory where the PDF files are stored.
         pdf_files = os.listdir(data_dir)  # Lists the files in the specified directory.
         documents, labels = [], []
         # documents = []  # Initializes a list to store the documents (text extracted from PDFs).
@@ -164,16 +170,25 @@ def resposta():
         report = classification_report(y_test, predictions)
         file_path = 'trainingDataNaiveBayes.pkl'
         save_data(X_train, X_test, y_train, y_test, file_path)
+
+        if not os.path.exists(file_path):
+            with open(file_path, 'w') as file:
+                file.write('')
+        else:
+            print('Arquivo ja existe.')
+
         # Saves the model training and testing data to a file
         print('\n')
         print('Model training data saved')
         print(report)
         print(os.path.exists('trainingDataNaiveBayes.pkl')) 
         print(os.path.getsize('trainingDataNaiveBayes.pkl'))
+        
 
     
         return jsonify({'message': 'Model trained successfully!', 'classification_report': report})
-    except Exception:
+    except Exception as e:
+        logging.error("Falha ao treinar o modelo: %s", str(e))
         return jsonify({'error': 'Falha ao treinar IA'}), 500
 
 
@@ -299,12 +314,12 @@ switch_case = {
 
 @app.route('/classificar', methods=['POST'])
 def resposta2():
-    if 'uploaded_file' not in request.files:
-        return jsonify({'error': 'No file part'}), 400
+    if 'uploaded_file' not in request.files: #EM UPLOADED_FILE É O NOME DO INPUT DE ARQUIVO
+        return jsonify({'error': 'Selecione um arquivo PDF.'}), 400
     
-    file = request.files['uploaded_file']
+    file = request.files['uploaded_file'] #EM UPLOADED_FILE É O NOME DO INPUT DE ARQUIVO
     if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
+        return jsonify({'error': 'Selecione um arquivo PDF.'}), 400
 
     if file and file.filename.endswith('.pdf'):
         # Save the PDF file in a temporary directory
@@ -318,8 +333,8 @@ def resposta2():
             os.remove(file_path)
         
         return jsonify({'message': 'Model trained successfully!', 'classification_report': result})
-
-    return jsonify({'error': 'Invalid file format'}), 400
+    else:
+        return jsonify({'error': 'O arquivo não é um PDF.'}), 400
 
 
 
@@ -366,17 +381,17 @@ def resposta3():
         if 'correcao_file' not in request.files:
             return jsonify({'message': 'É NECESSÁRIO ENVIAR UM ARQUIVO'}), 400
         
-        arquivo_pdf = request.files['correcao_file']
+        arquivo_pdf = request.files['correcao_file'] #EM CORRECAO_FILE É O NOME DO INPUT DE ARQUIVO
         
 
         if not arquivo_pdf.filename.endswith('.pdf'):
             return jsonify({'message': 'O ARQUIVO NÃO É UM PDF.'}), 400
 
-        input_especializada = request.form['especializada'].upper()
+        input_especializada = request.form['especializada'].upper() #EM ESPECIALIZADA É O NOME DO INPUT DE TEXTO
         if not input_especializada or input_especializada not in ['PAS', 'PDA', 'PPE', 'PSE', 'PTR', 'PUMA', 'PTA']:
             return jsonify({'message': 'SIGLA INVÁLIDA'}), 400
 
-        caminho_dir = r"C:\Users\3354339\Desktop\APITreinamento\DirTrein"
+        caminho_dir = "./DirTrein"
 
         result = copiar_pdf_para_diretorio(arquivo_pdf, caminho_dir, input_especializada)
 
@@ -386,5 +401,5 @@ def resposta3():
         return jsonify({'message': 'ERRO'}), 400
 
 if __name__ == '__main__':
-    pkl = ['CAMINHO PKL']
-    app.run(host='IP DO SEU SERVIDOR', port=5000, debug=True, extra_files=pkl)
+    pkl = ['trainingDataNaiveBayes.pkl']
+    app.run(host='10.32.96.18', port=5000, debug=True, extra_files=pkl)
