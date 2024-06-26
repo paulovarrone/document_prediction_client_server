@@ -388,7 +388,11 @@ def resposta3():
             return jsonify({'message': 'O ARQUIVO NÃO É UM PDF.'}), 400
 
         input_especializada = request.form['especializada'].upper() #EM ESPECIALIZADA É O NOME DO INPUT DE TEXTO
-        if not input_especializada or input_especializada not in ['PAS', 'PDA', 'PPE', 'PSE', 'PTR', 'PUMA', 'PTA']:
+
+        if input_especializada == '':
+            return jsonify({'message': 'DIGITE UMA ESPECIALIZADA.'})
+          
+        elif input_especializada not in ['PAS', 'PDA', 'PPE', 'PSE', 'PTR', 'PUMA', 'PTA']:
             return jsonify({'message': 'SIGLA INVÁLIDA'}), 400
 
         caminho_dir = "./DirTrein"
