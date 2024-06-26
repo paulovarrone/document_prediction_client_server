@@ -390,7 +390,7 @@ def resposta3():
         input_especializada = request.form['especializada'].upper() #EM ESPECIALIZADA É O NOME DO INPUT DE TEXTO
 
         if input_especializada == '':
-            return jsonify({'message': 'DIGITE UMA ESPECIALIZADA.'})
+            return jsonify({'message': 'DIGITE UMA ESPECIALIZADA.'}), 400
           
         elif input_especializada not in ['PAS', 'PDA', 'PPE', 'PSE', 'PTR', 'PUMA', 'PTA']:
             return jsonify({'message': 'SIGLA INVÁLIDA'}), 400
