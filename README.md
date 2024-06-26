@@ -12,5 +12,7 @@ Essas correções deixam o texto mais claro e preciso, garantindo que as informa
 
 Este programa foi desenvolvido para a PROCURADORIA GERAL DO MUNICÍPIO DO RIO DE JANEIRO para classificação de documentos das especializadas e auxílio no envio para tais.
 
+Ao iniciar a aplicação um arquivo .log será gerado.
+
 
 ![image](https://github.com/paulovarrone/document_prediction_client_server/assets/100317569/9ba83070-29d6-47c9-9208-29f78ebef815)
