@@ -19,9 +19,9 @@ import logging
 import nltk
 import shutil
 
-#curl -X POST http://SEU IP:5000/treino
-#curl -X POST http://SEU IP:5000/classificar
-#curl -X POST http://SEU IP:5000/ajustar
+#curl -X POST http://IP DO SERVIDOR:5000/treino
+#curl -X POST http://IP DO SERVIDOR:5000/classificar
+#curl -X POST http://IP DO SERVIDOR:5000/ajustar
 
 #ENDPOINTS treino, classificar, ajustar
 
