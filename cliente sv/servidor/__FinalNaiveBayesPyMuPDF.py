@@ -406,4 +406,4 @@ def resposta3():
 
 if __name__ == '__main__':
     pkl = ['trainingDataNaiveBayes.pkl']
-    app.run(host='10.32.96.18', port=5000, debug=True, extra_files=pkl)
+    app.run(host='IP DO SERVIDOR', port=5000, debug=True, extra_files=pkl)
