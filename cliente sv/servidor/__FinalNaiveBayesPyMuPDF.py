@@ -19,9 +19,9 @@ import logging
 import nltk
 import shutil
 
-#curl -X POST http://IP DO SERVIDOR:5000/treino
-#curl -X POST http://IP DO SERVIDOR:5000/classificar
-#curl -X POST http://IP DO SERVIDOR:5000/ajustar
+#curl -X POST http://SEU IP:5000/treino
+#curl -X POST http://SEU IP:5000/classificar
+#curl -X POST http://SEU IP:5000/ajustar
 
 #ENDPOINTS treino, classificar, ajustar
 def create_app():
@@ -63,6 +63,7 @@ def create_app():
                     page = pdf_document.load_page(page_num)  # Carrega a página atual do PDF.
                     text += page.get_text()  # Extrai o texto da página atual e concatena-o à string de texto.
         except Exception as e:
+            logging.error("Ocorreu um erro ao extrair o texto do PDF", str(e))
             print(f"Ocorreu um erro: {e}")
         return text  # Retorna o texto extraído do PDF.
 
@@ -218,6 +219,7 @@ def create_app():
                 for page in pdf_file:  # Iterate over all pages of the PDF.
                     text += page.get_text()  # Extract text from each page and concatenate it to the text string.
         except Exception as e:
+            logging.error("ERRO: %s", str(e))
             print(f"An error occurred: {e}")
         return text  # Returning the extracted text from the PDF.
 
@@ -274,6 +276,7 @@ def create_app():
             return(specialized)
         
         else:
+            logging.error("ERRO ao converter PDF para texto")
     #         print("Failed to convert PDF to text.")  # Displaying a failure message if the PDF to text conversion fails.
             return("Failed to convert PDF to text.")
 
@@ -334,6 +337,7 @@ def create_app():
             
             return jsonify({'message': 'Model trained successfully!', 'classification_report': result})
         else:
+            logging.error("O arquivo nao é um PDF")
             return jsonify({'error': 'O arquivo não é um PDF.'}), 400
 
 
@@ -373,6 +377,7 @@ def create_app():
             arquivo_pdf.save(caminho_completo)
             return f"Arquivo enviado com sucesso"
         except Exception as e:
+            logging.error("Ocorreu um erro ao salvar o arquivo PDF: %s", str(e))
             return f"Ocorreu um erro ao salvar o arquivo PDF"
 
     @app.route('/ajustar', methods=['POST'])
@@ -401,7 +406,8 @@ def create_app():
 
             
             return jsonify({'message': 'Model trained successfully!', 'classification_report': result})
-        except Exception:
+        except Exception as e:
+            logging.error("Falha ao ajustar o modelo: %s", str(e))
             return jsonify({'message': 'ERRO'}), 400
         
     return app
@@ -409,4 +415,4 @@ def create_app():
 if __name__ == '__main__':
     app = create_app()
     pkl = ['trainingDataNaiveBayes.pkl']
-    app.run(host='IP DO SERVIDOR', port=5000, debug=True, extra_files=pkl)
+    app.run(host='SEU IP', port=5000, debug=True, extra_files=pkl)
