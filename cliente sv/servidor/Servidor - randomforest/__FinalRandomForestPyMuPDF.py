@@ -63,6 +63,7 @@ def create_app():
                     page = pdf_document.load_page(page_num)  # Carrega a página atual do PDF.
                     text += page.get_text()  # Extrai o texto da página atual e concatena-o à string de texto.
         except Exception as e:
+            logging.error("Ocorreu um erro ao extrair o texto do PDF", str(e))
             print(f"Ocorreu um erro: {e}")
         return text  # Retorna o texto extraído do PDF.
 
@@ -274,6 +275,7 @@ def create_app():
             return(specialized)
         
         else:
+            logging.error("ERRO ao converter PDF para texto")
     #         print("Failed to convert PDF to text.")  # Displaying a failure message if the PDF to text conversion fails.
             return("Failed to convert PDF to text.")
 
@@ -334,6 +336,7 @@ def create_app():
             
             return jsonify({'message': 'Model trained successfully!', 'classification_report': result})
         else:
+            logging.error("O arquivo nao é um PDF")
             return jsonify({'error': 'O arquivo não é um PDF.'}), 400
 
 
@@ -373,6 +376,7 @@ def create_app():
             arquivo_pdf.save(caminho_completo)
             return f"Arquivo enviado com sucesso"
         except Exception as e:
+            logging.error("Ocorreu um erro ao salvar o arquivo PDF: %s", str(e))
             return f"Ocorreu um erro ao salvar o arquivo PDF"
 
     @app.route('/ajustar', methods=['GET','POST'])
@@ -401,7 +405,8 @@ def create_app():
 
             
             return jsonify({'message': 'Model trained successfully!', 'classification_report': result})
-        except Exception:
+        except Exception as e:
+            logging.error("Falha ao ajustar o modelo: %s", str(e))
             return jsonify({'message': 'ERRO'}), 400
 
     return app
