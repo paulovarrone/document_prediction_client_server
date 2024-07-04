@@ -216,6 +216,7 @@ def extrair_texto_classificacao(file_path_class):
             for page in pdf_file:  # Iterate over all pages of the PDF.
                 text += page.get_text()  # Extract text from each page and concatenate it to the text string.
     except Exception as e:
+        logging.error("ERRO: %s", str(e))
         print(f"An error occurred: {e}")
     return text  # Returning the extracted text from the PDF.
 
@@ -272,6 +273,7 @@ def predict_classificacao(file_path_class,switch_case_class):
         return(specialized)
      
     else:
+        logging.error("ERRO ao converter PDF para texto")
 #         print("Failed to convert PDF to text.")  # Displaying a failure message if the PDF to text conversion fails.
         return("Failed to convert PDF to text.")
 
@@ -332,6 +334,7 @@ def resposta2():
         
         return jsonify({'message': 'Model trained successfully!', 'classification_report': result})
     else:
+        logging.error("O arquivo nao é um PDF")
         return jsonify({'error': 'O arquivo não é um PDF.'}), 400
 
 
@@ -371,6 +374,7 @@ def copiar_pdf_para_diretorio(arquivo_pdf, destino_diretorio, especializada):
         arquivo_pdf.save(caminho_completo)
         return f"Arquivo enviado com sucesso"
     except Exception as e:
+        logging.error("Ocorreu um erro ao salvar o arquivo PDF: %s", str(e))
         return f"Ocorreu um erro ao salvar o arquivo PDF"
 
 @app.route('/ajustar', methods=['GET','POST'])
@@ -399,7 +403,8 @@ def resposta3():
 
         
         return jsonify({'message': 'Model trained successfully!', 'classification_report': result})
-    except Exception:
+    except Exception as e:
+        logging.error("Falha ao ajustar o modelo: %s", str(e))
         return jsonify({'message': 'ERRO'}), 400
 
 if __name__ == '__main__':
