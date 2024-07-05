@@ -250,13 +250,10 @@ def create_app():
         Returns:
         dict: A dictionary containing the training data.
         """
-        try:
-            with open(file_path_class, 'rb') as file:  # Opening the file in binary read mode.
-                data = pickle.load(file)  # Loading data from the file using pickle.
-            return data  # Returning the loaded data.
-        except Exception as e:
-            logging.error('ERRO AO CARREGAR DADOS %s', str(e))
-            return jsonify({'erro' : "ERRO AO CARREGAR DADOS"}), 400
+        
+        with open(file_path_class, 'rb') as file:  # Opening the file in binary read mode.
+            data = pickle.load(file)  # Loading data from the file using pickle.
+        return data  # Returning the loaded data.
 
     ##########################################################################################################################################
     #  Function predict  the  especialized from a PDF file
@@ -282,7 +279,7 @@ def create_app():
         else:
             logging.error("ERRO ao converter PDF para texto")
     #         print("Failed to convert PDF to text.")  # Displaying a failure message if the PDF to text conversion fails.
-            return jsonify({'erro': "Failed to convert PDF to text."})
+            return("Failed to convert PDF to text.")
 
 
 
