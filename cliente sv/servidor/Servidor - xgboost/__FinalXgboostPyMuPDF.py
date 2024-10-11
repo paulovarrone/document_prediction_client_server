@@ -118,7 +118,7 @@ def resposta():
         }
 
         # Directory where the data (PDFs) are stored
-        data_dir = './DirTrein'  # Defines the directory where the PDF files are stored.
+        data_dir = r'C:\Developer\classificador\DirTrein'  # Defines the directory where the PDF files are stored.
         pdf_files = os.listdir(data_dir)  # Lists the files in the specified directory.
         documents, labels = [], []
         # documents = []  # Initializes a list to store the documents (text extracted from PDFs).
@@ -216,7 +216,6 @@ def extrair_texto_classificacao(file_path_class):
             for page in pdf_file:  # Iterate over all pages of the PDF.
                 text += page.get_text()  # Extract text from each page and concatenate it to the text string.
     except Exception as e:
-        logging.error("ERRO: %s", str(e))
         print(f"An error occurred: {e}")
     return text  # Returning the extracted text from the PDF.
 
@@ -273,7 +272,6 @@ def predict_classificacao(file_path_class,switch_case_class):
         return(specialized)
      
     else:
-        logging.error("ERRO ao converter PDF para texto")
 #         print("Failed to convert PDF to text.")  # Displaying a failure message if the PDF to text conversion fails.
         return("Failed to convert PDF to text.")
 
@@ -314,27 +312,31 @@ switch_case = {
 
 @app.route('/classificar', methods=['GET','POST'])
 def resposta2():
-    if 'uploaded_file' not in request.files: #EM UPLOADED_FILE É O NOME DO INPUT DE ARQUIVO
-        return jsonify({'error': 'Selecione um arquivo PDF.'}), 400
-    
-    file = request.files['uploaded_file'] #EM UPLOADED_FILE É O NOME DO INPUT DE ARQUIVO
-    if file.filename == '':
-        return jsonify({'error': 'Selecione um arquivo PDF.'}), 400
+    try:
+        if 'uploaded_file' not in request.files: #EM UPLOADED_FILE É O NOME DO INPUT DE ARQUIVO
+            return jsonify({'error': 'Selecione um arquivo PDF.'}), 400
+        
+        file = request.files['uploaded_file'] #EM UPLOADED_FILE É O NOME DO INPUT DE ARQUIVO
+        if file.filename == '':
+            return jsonify({'error': 'Selecione um arquivo PDF.'}), 400
 
-    if file and file.filename.endswith('.pdf'):
-        # Save the PDF file in a temporary directory
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
-            file_path = temp_file.name
-            file.save(file_path)
-        
-        try:
-            result = predict_classificacao(file_path, switch_case)
-        finally:
-            os.remove(file_path)
-        
-        return jsonify({'message': 'Model trained successfully!', 'classification_report': result})
-    else:
-        logging.error("O arquivo nao é um PDF")
+        if file and file.filename.endswith('.pdf'):
+            # Save the PDF file in a temporary directory
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+                file_path = temp_file.name
+                file.save(file_path)
+            
+            try:
+                result = predict_classificacao(file_path, switch_case)
+            finally:
+                os.remove(file_path)
+            
+            return jsonify({'message': 'Model trained successfully!', 'classification_report': result})
+        else:
+            return jsonify({'error': 'O arquivo não é um PDF.'}), 400
+    
+    except Exception as e:
+        logging.error("Arquivo nao é um PDF: %s", str(e))
         return jsonify({'error': 'O arquivo não é um PDF.'}), 400
 
 
@@ -374,7 +376,7 @@ def copiar_pdf_para_diretorio(arquivo_pdf, destino_diretorio, especializada):
         arquivo_pdf.save(caminho_completo)
         return f"Arquivo enviado com sucesso"
     except Exception as e:
-        logging.error("Ocorreu um erro ao salvar o arquivo PDF: %s", str(e))
+        logging.error("Falha ao treinar salvar PDF: %s", str(e))
         return f"Ocorreu um erro ao salvar o arquivo PDF"
 
 @app.route('/ajustar', methods=['GET','POST'])
@@ -397,16 +399,16 @@ def resposta3():
             return jsonify({'message': 'SIGLA INVÁLIDA'}), 400
         
         
-        caminho_dir = "./DirTrein"
+        caminho_dir = r'C:\Developer\classificador\DirTrein'
 
         result = copiar_pdf_para_diretorio(arquivo_pdf, caminho_dir, input_especializada)
 
         
         return jsonify({'message': 'Model trained successfully!', 'classification_report': result})
     except Exception as e:
-        logging.error("Falha ao ajustar o modelo: %s", str(e))
+        logging.error("Falha ao enviar arquivo: %s", str(e))
         return jsonify({'message': 'ERRO'}), 400
 
 if __name__ == '__main__':
     pkl = ['trainingXgboost.pkl']
-    app.run(host='seu ip', port=5001, debug=True, extra_files=pkl)
+    app.run(host='0.0.0.0', port=5001, debug=True, extra_files=pkl)
