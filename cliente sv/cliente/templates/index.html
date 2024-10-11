@@ -7,10 +7,34 @@
     <title>Classificação</title>
 </head>
 <body>
+    <div id="btn">
+        <div id="su">
+            <form action="/treinamento" method="POST">
+                <button type="submit" name="treinar" value="Enviar">Treinar IA</button>
+                
+                {% if treino_ok %}
+
+                <div id="result">
+                    <p>{{ treino_ok }}</p>
+                </div>
+
+                {% elif erro_treino %}
+
+                    <div id="error">
+                        <p>{{ erro_treino }}</p>
+                    </div>
+
+                {% endif %}
+
+            </form>
+
+        </div>
+    </div>
+
     <div id="corpo">
         <div id="chat">
             <h1>Classificação Especializadas</h1>
-            <form action="/enviar_pdf" method="POST" enctype="multipart/form-data">
+            <form id="form" action="/enviar_pdf" method="POST" enctype="multipart/form-data">
                 <label for="pdf_file">Coloque arquivo PDF:</label>
                 <input type="file" name="uploaded_file" accept=".pdf" required>
                 <br>
@@ -40,7 +64,7 @@
 
         <div id="chat">
             <h1>Correção da Classificação</h1>
-            <form action="/corrigir_pdf" method="POST" enctype="multipart/form-data">
+            <form id="form" action="/corrigir_pdf" method="POST" enctype="multipart/form-data">
                 <label for="correcao_file">Coloque arquivo PDF:</label>
                 <input type="file" name="correcao_file" accept=".pdf" required>
                 <br>
@@ -49,13 +73,7 @@
                 <br>
                 <button type="submit">Enviar</button>
 
-                {% if erro_esp %}
-
-                    <div id="result">
-                        <p id="erro_esp">{{ erro_esp }}</p>
-                    </div>
-                
-                {% elif correcao_ok %}
+                {% if correcao_ok %}
 
                     <div id="result">
                         <h2>Classificação Corrigida:</h2>
@@ -78,5 +96,6 @@
 
     </div>
 
+    <footer>Desenvolvido Pela Coordenadoria de Tecnologia da PGM - CTEC</footer>
 </body>
 </html>
