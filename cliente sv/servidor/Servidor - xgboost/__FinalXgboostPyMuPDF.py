@@ -51,7 +51,7 @@ def save_data(X_train, X_test, y_train, y_test, file_path):
 
 def train_model():
     sector_mapping = {'PAS': 0, 'PDA': 1, 'PPE': 2, 'PSE': 3, 'PTR': 4, 'PUMA': 5, 'PTA': 6}
-    data_dir = r'CAMINHO DIRTRAIN'
+    data_dir = './DirTrein'
     pdf_files = os.listdir(data_dir)
     documents, labels = [], []
 
@@ -198,7 +198,7 @@ def resposta3():
         elif input_especializada not in ['PAS', 'PDA', 'PPE', 'PSE', 'PTR', 'PUMA', 'PTA']:
             return jsonify({'message': 'SIGLA INVÁLIDA'}), 400
         
-        caminho_dir = r"CAMINHO DIRTRAIN"
+        caminho_dir = './DirTrein'
         result = copiar_pdf_para_diretorio(arquivo_pdf, caminho_dir, input_especializada)
         
         return jsonify({'message': 'Document adjusted successfully!', 'classification_report': result})
