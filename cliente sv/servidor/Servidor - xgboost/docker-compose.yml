@@ -4,9 +4,9 @@ services:
     ports:
       - "5001:5001"
     volumes:
-      - /c/Users/3470622/Desktop/xgboost/DirTrein:/app/DirTrein               
-      - /c/Users/3470622/Desktop/xgboost/training_errors.log:/app/training_errors.log  
-      - /c/Users/3470622/Desktop/xgboost/trainingXgboost.pkl:/app/trainingXgboost.pkl
+      - CAMINHO PARA O/DirTrein:/app/DirTrein               
+      - CAMINHO PARA O/training_errors.log:/app/training_errors.log  
+      - CAMINHO PARA O/trainingXgboost.pkl:/app/trainingXgboost.pkl
     environment:
       FLASK_APP: __FinalXgboostPyMuPDF.py
       FLASK_ENV: development
