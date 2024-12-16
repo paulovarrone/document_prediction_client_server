@@ -3,58 +3,31 @@ import requests
 
 app = Flask(__name__)
 
-###  
-# SE A IA ERRAR AS ESPECIALIZADAS NO INPUT DEVEM SER POSTAS COMO SUAS SIGLAS
 
-# PAS
-# PDA
-# PPE
-# PSE
-# PTR
-# PUMA
-# PTA
-
-
-
-###
-
-
-
-@app.route('/index')
+@app.route('/')
 def index():
     return render_template('index.html')
     
 
 @app.route('/enviar_pdf', methods=['POST'])
 def enviar():
-    if 'uploaded_file' in request.files:
-        file = request.files['uploaded_file']
-        files = {'uploaded_file': (file.filename, file.read(), file.content_type)}
-        proxy = {
-            'http': None,
-            'https': None
-        }
-        response = requests.post('http://SEU IP:5001/classificar', files=files, proxies=proxy)
-        if response.ok:
-            result = response.json().get('classification_report', 'No classification result')
-            return render_template('index.html', classification_result=result)
-        else:
-            error_message = 'Failed to classify PDF'
-            return render_template('index.html', error_classificacao_message=error_message)
-    return render_template('index.html', error_classificacao_message='Falha no envio do arquivo')
-
-###  
-# SE A IA ERRAR AS ESPECIALIZADAS NO INPUT DEVEM SER POSTAS COMO SUAS SIGLAS
-
-# PAS
-# PDA
-# PPE
-# PSE
-# PTR
-# PUMA
-# PTA
-
-
+    try:
+        if 'uploaded_file' in request.files:
+            file = request.files['uploaded_file']
+            files = {'uploaded_file': (file.filename, file.read(), file.content_type)}
+            proxy = {
+                'http': None,
+                'https': None
+            }
+            response = requests.post('http://SEU IP/classificar', files=files, proxies=proxy)
+            if response.ok:
+                result = response.json().get('classification_report', 'No classification result')
+                return render_template('index.html', classification_result=result)
+            else:
+                error_message = 'Falha ao classificar, utilize um PDF válido'
+                return render_template('index.html', error_classificacao_message=error_message)
+    except Exception:
+        return render_template('index.html', error_classificacao_message='Falha no envio do arquivo')
 
 
 
@@ -70,8 +43,11 @@ def corrigir():
             'https': None
         }
 
+        if especializada not in ['PAS', 'PDA', 'PPE', 'PSE', 'PTR', 'PUMA', 'PTA']:
+            return render_template('index.html', error_correcao_message='ESPECIALIZADA DIGITADA ERRADA')
+
         try:
-            response = requests.post('http://SEU IP:5001/ajustar', files=files, data=data, proxies=proxy)
+            response = requests.post('http://SEU IP/ajustar', files=files, data=data, proxies=proxy)
             if response.ok:
                 result = response.json().get('classification_report', 'No classification result')
                 return render_template('index.html', correcao_ok=result)
@@ -83,25 +59,6 @@ def corrigir():
         return render_template('index.html', error_correcao_message='Nenhum arquivo enviado')
     
 
-
-###  
-# SE A IA ERRAR AS ESPECIALIZADAS NO INPUT DEVEM SER POSTAS COMO SUAS SIGLAS
-
-# PAS
-# PDA
-# PPE
-# PSE
-# PTR
-# PUMA
-# PTA
-
-
-
-###
-
-
-
-
 @app.route('/treinamento', methods=['POST'])
 def treinar():
     try:
@@ -111,7 +68,7 @@ def treinar():
             'https': None
         }
 
-        response = requests.post('http://SEU IP:5001/treino', proxies=proxy)
+        response = requests.post('http://SEU IP/treino', proxies=proxy)
 
         if response.ok:
             return render_template('index.html', treino_ok = 'IA treinada com sucesso')
@@ -123,16 +80,6 @@ def treinar():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', port=5002, debug=True)
 
 
-###  
-# SE A IA ERRAR AS ESPECIALIZADAS NO INPUT DEVEM SER POSTAS COMO SUAS SIGLAS
-
-# PAS
-# PDA
-# PPE
-# PSE
-# PTR
-# PUMA
-# PTA
