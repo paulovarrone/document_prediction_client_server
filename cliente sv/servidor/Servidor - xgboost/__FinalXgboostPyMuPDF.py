@@ -13,9 +13,10 @@ from nltk.tokenize import word_tokenize
 from tqdm import tqdm
 import pickle
 import fitz  # PyMuPDF
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, current_app
 import logging
 import xgboost as xgb
+import threading
 
 app = Flask(__name__)
 
@@ -51,7 +52,7 @@ def save_data(X_train, X_test, y_train, y_test, file_path):
 
 def train_model():
     sector_mapping = {'PAS': 0, 'PDA': 1, 'PPE': 2, 'PSE': 3, 'PTR': 4, 'PUMA': 5, 'PTA': 6}
-    data_dir = './DirTrein'
+    data_dir = r'./DirTrein'
     pdf_files = os.listdir(data_dir)
     documents, labels = [], []
 
@@ -73,7 +74,9 @@ def train_model():
 
     pipeline = Pipeline([
         ('vect', CountVectorizer(max_features=10000)),
-        ('clf', xgb.XGBClassifier(eval_metric='mlogloss'))
+        ('clf',xgb.XGBClassifier(
+                eval_metric='logloss', 
+            ))
     ])
 
     print('Preprocessing training data...')
@@ -120,9 +123,14 @@ def predict_classificacao(file_path_class, switch_case_class):
 
 # Load data and fit model; retrain if loading fails
 loaded_data = load_data_classificacao('trainingXgboost.pkl')
+# pipeline_class = Pipeline([
+#     ('vect', CountVectorizer(max_features=10000)),
+#     ('clf', xgb.XGBClassifier(eval_metric='mlogloss'))
+# ])
+
 pipeline_class = Pipeline([
     ('vect', CountVectorizer(max_features=10000)),
-    ('clf', xgb.XGBClassifier(eval_metric='mlogloss'))
+    ('clf', xgb.XGBClassifier(eval_metric='logloss'))
 ])
 
 if loaded_data:
@@ -131,16 +139,30 @@ if loaded_data:
 else:
     pipeline_class = train_model()
 
+def train_model_async(app):
+    with app.app_context():
+        try:
+            pipeline = train_model()
+            global pipeline_class
+            pipeline_class = pipeline
+            logging.info("Modelo treinado com sucesso!")
+        except Exception as e:
+            logging.error("Falha ao treinar o modelo: %s", str(e))
+
+
 @app.route('/treino', methods=['POST'])
 def resposta():
     try:
-        pipeline = train_model()
-        global pipeline_class
-        pipeline_class = pipeline
-        return jsonify({'message': 'Model trained successfully!'})
+        threading.Thread(
+            target=train_model_async,
+            args=(current_app._get_current_object(),)
+        ).start()
+
+        return jsonify({'message': 'Treinamento iniciado em background!'})
+
     except Exception as e:
-        logging.error("Falha ao treinar o modelo: %s", str(e))
-        return jsonify({'error': 'Falha ao treinar IA'}), 500
+        logging.error("Erro ao iniciar thread de treinamento: %s", str(e))
+        return jsonify({'error': 'Falha ao iniciar treinamento'}), 500
 
 @app.route('/classificar', methods=['POST'])
 def resposta2():
@@ -198,7 +220,7 @@ def resposta3():
         elif input_especializada not in ['PAS', 'PDA', 'PPE', 'PSE', 'PTR', 'PUMA', 'PTA']:
             return jsonify({'message': 'SIGLA INVÁLIDA'}), 400
         
-        caminho_dir = './DirTrein'
+        caminho_dir = r"./DirTrein"
         result = copiar_pdf_para_diretorio(arquivo_pdf, caminho_dir, input_especializada)
         
         return jsonify({'message': 'Document adjusted successfully!', 'classification_report': result})
